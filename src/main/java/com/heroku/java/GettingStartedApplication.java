@@ -5,6 +5,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -25,6 +27,25 @@ public class GettingStartedApplication {
     @GetMapping("/")
     public String index() {
         return "index";
+    }
+
+    @GetMapping("/dbinput")
+    public String dbinput() {
+        return "dbinput";
+    }
+
+    @PostMapping("/save")
+    public String saveCustomString(@RequestParam("customString") String customString, Map<String, Object> model) {
+        try (Connection connection = dataSource.getConnection()) {
+            final var statement = connection.createStatement();
+            statement.executeUpdate("INSERT INTO table_timestamp_and_random_string VALUES (now(), '" + customString + "')");
+
+            return "redirect:/database";
+
+        } catch (Throwable t) {
+            model.put("message", t.getMessage());
+            return "error";
+        }
     }
 
     @GetMapping("/database")
